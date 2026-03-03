@@ -1,4 +1,6 @@
-﻿using CairoPaymentEngine.Domain.Common;
+using CairoPaymentEngine.Domain.Common;
+using CairoPaymentEngine.Domain.Enums;
+using CairoPaymentEngine.Domain.Events;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,7 +17,10 @@ namespace CairoPaymentEngine.Domain.Entities
 
         public OrderStatus Status { get; private set; }
 
-        private Order() { } 
+        private List<Payment> _payments = new();
+        public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();
+
+        //private Order() { } 
 
         public Order(decimal amount, string currency)
         {

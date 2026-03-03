@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using CairoPaymentEngine.Domain.Enums;
 
 namespace CairoPaymentEngine.Domain.Entities
 {
@@ -19,6 +17,8 @@ namespace CairoPaymentEngine.Domain.Entities
         public PaymentStatus Status { get; private set; }
 
         public string? ProcessedEventId { get; private set; }
+
+        public Order Order { get; private set; } = null!;
 
         private Payment() { }
 

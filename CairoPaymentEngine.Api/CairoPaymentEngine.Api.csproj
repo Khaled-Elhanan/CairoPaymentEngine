@@ -8,7 +8,18 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.24">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CairoPaymentEngine.Application\CairoPaymentEngine.Application.csproj" />
+    <ProjectReference Include="..\CairoPaymentEngine.Domain\CairoPaymentEngine.Domain.csproj" />
+    <ProjectReference Include="..\CairoPaymentEngine.Infrastructure\CairoPaymentEngine.Infrastructure.csproj" />
+    <ProjectReference Include="..\CairoPaymentEngine.Persistence\CairoPaymentEngine.Persistence.csproj" />
   </ItemGroup>
 
 </Project>
