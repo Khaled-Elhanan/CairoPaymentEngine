@@ -1,6 +1,7 @@
 ﻿using CairoPaymentEngine.Application.Abstractions;
 using CairoPaymentEngine.Domain.Entities;
 using CairoPaymentEngine.Domain.Enums;
+using CairoPaymentEngine.Domain.Exceptioins;
 
 namespace CairoPaymentEngine.Application.Service
 {
@@ -22,21 +23,17 @@ namespace CairoPaymentEngine.Application.Service
         public async Task<string> CreatePaymentAsync(Guid orderId, PaymentGateway gatewayType)
         {
             var order = await _orderRepository.GetByIdAsync(orderId)
-                ?? throw new Exception("Order is not in a payable state");
+                ?? throw new OrderNotFoundException(orderId);
 
             if (order.Status != OrderStatus.Pending)
-                throw new Exception("Order is not in a payable state");
+                throw new OrderNotPayableException(orderId);
 
             var gateway = _gateways.FirstOrDefault(g => g.GatewayType == gatewayType)
-            ?? throw new Exception("Gateway not supported");
-            var (externalId, idempotencyKey) =
-                await gateway.CreatePaymentAsync(order);
-            var payment = new Payment(
-            order.Id,
-            gatewayType,
-            externalId,
-            idempotencyKey);
+                ?? throw new GatewayNotSupportedException(gatewayType.ToString());
 
+            var (externalId, idempotencyKey) = await gateway.CreatePaymentAsync(order);
+
+            var payment = new Payment(order.Id, gatewayType, externalId, idempotencyKey);
             await _paymentRepository.AddAsync(payment);
 
             return externalId;
@@ -48,19 +45,23 @@ namespace CairoPaymentEngine.Application.Service
             PaymentGateway gatewayType)
         {
             var payment = await _paymentRepository.GetByExternalIdAsync(externalId)
-                ?? throw new Exception("Payment not found");
+                ?? throw new PaymentNotFoundException(externalId);
 
-            var gateway = _gateways.First(g => g.GatewayType == gatewayType);
+            // Already processed — idempotency guard
+            if (payment.ProcessedEventId == eventId)
+                return;
+
+            var gateway = _gateways.FirstOrDefault(g => g.GatewayType == gatewayType)
+                ?? throw new GatewayNotSupportedException(gatewayType.ToString());
 
             var verified = await gateway.VerifyPaymentAsync(externalId, eventId);
-
             if (!verified)
-                throw new Exception("Payment verification failed");
+                throw new PaymentVerificationFailedException(externalId);
 
             payment.MarkSucceeded(eventId);
 
             var order = await _orderRepository.GetByIdAsync(payment.OrderId)
-                ?? throw new Exception("Order not found");
+                ?? throw new OrderNotFoundException(payment.OrderId);
 
             order.MarkAsPaid();
 

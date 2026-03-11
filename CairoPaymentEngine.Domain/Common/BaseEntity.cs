@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CairoPaymentEngine.Domain.Common
+﻿namespace CairoPaymentEngine.Domain.Common
 {
     public abstract class BaseEntity
     {

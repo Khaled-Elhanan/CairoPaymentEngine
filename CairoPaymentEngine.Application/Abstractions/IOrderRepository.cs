@@ -1,8 +1,4 @@
 ﻿using CairoPaymentEngine.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace CairoPaymentEngine.Application.Abstractions
 {
     public interface IOrderRepository

@@ -22,4 +22,8 @@
     <ProjectReference Include="..\CairoPaymentEngine.Persistence\CairoPaymentEngine.Persistence.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Middleware\" />
+  </ItemGroup>
+
 </Project>
