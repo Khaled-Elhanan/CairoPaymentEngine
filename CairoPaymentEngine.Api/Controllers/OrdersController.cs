@@ -1,4 +1,6 @@
 ﻿using CairoPaymentEngine.Application.Abstractions;
+using CairoPaymentEngine.Application.DTOs.Requests;
+using CairoPaymentEngine.Application.DTOs.Responses;
 using CairoPaymentEngine.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,18 +10,29 @@ namespace CairoPaymentEngine.Api.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private readonly IOrderRepository _orderRepository;
+        private readonly IPaymentService _paymentService;
 
-        public OrdersController(IOrderRepository orderRepository)
+        public OrdersController(IPaymentService paymentService)
         {
-            _orderRepository = orderRepository;
+            _paymentService = paymentService;
         }
         [HttpPost]
-        public async Task<IActionResult> CreateOrder(decimal amount  , string currency)
+        [ProducesResponseType(typeof(CreateOrderResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
         {
-            var order = new Order(amount , currency);   
-            await _orderRepository.AddAsync(order);
-            return Ok(new { order.Id });
+            var response = await _paymentService.CreateOrderAsync(request);
+            return CreatedAtAction(nameof(CreateOrder), new { id = response.OrderId }, response);
         }
+        [HttpPost("{id}/pay")]
+        [ProducesResponseType(typeof(InitiatePaymentResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> InitiatePayment(Guid id, [FromBody] InitiatePaymentRequest request)
+        {
+            var response = await _paymentService.InitiatePaymentAsync(request with { OrderId = id });
+            return Ok(response);
+        }
+
     }
 }

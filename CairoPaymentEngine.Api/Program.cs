@@ -1,4 +1,5 @@
-﻿using CairoPaymentEngine.Application.Abstractions;
+﻿using CairoPaymentEngine.Api.Middleware;
+using CairoPaymentEngine.Application.Abstractions;
 using CairoPaymentEngine.Application.Service;
 using CairoPaymentEngine.Infrastructure.Gateways;
 using CairoPaymentEngine.Infrastructure.Repository;
@@ -42,6 +43,8 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
