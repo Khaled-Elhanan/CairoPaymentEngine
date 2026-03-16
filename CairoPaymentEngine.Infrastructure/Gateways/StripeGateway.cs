@@ -1,7 +1,9 @@
 ﻿using CairoPaymentEngine.Application.Abstractions;
 using CairoPaymentEngine.Domain.Entities;
 using CairoPaymentEngine.Domain.Enums;
+using CairoPaymentEngine.Infrastructure.Settings;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,21 +20,17 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
         public PaymentGateway GatewayType => PaymentGateway.Stripe;
 
         private readonly HttpClient _httpClient;
-        private readonly string _secretKey;   
-        private readonly string _webhookSecret;
+        private readonly StripeSettings _settings;
 
-        public StripeGateway(HttpClient httpClient , IConfiguration configuration)
+        public StripeGateway(HttpClient httpClient, IOptions<StripeSettings> options)
         {
-          _httpClient= httpClient;
-            _secretKey = configuration["Gateways:Stripe:SecretKey"]
-                 ?? throw new InvalidOperationException("Stripe SecretKey is not configured.");
-            _webhookSecret = configuration["Gateways:Stripe:WebhookSecret"]
-                ?? throw new InvalidOperationException("Stripe WebhookSecret is not configured.");
-
+            _settings = options.Value;
+            _httpClient = httpClient;
             _httpClient.BaseAddress = new Uri("https://api.stripe.com/");
             _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", _secretKey);
+                new AuthenticationHeaderValue("Bearer", _settings.SecretKey);
         }
+
 
 
         public async Task<(string ExternalId, string IdempotencyKey)> CreatePaymentAsync(Order order)
@@ -42,9 +40,12 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
 
             var formDate = new Dictionary<string, string>
             {
-                { "amount", amountInSamllestUnit.ToString() },
-                { "currency", order.Currency },
-                { "description", $"Payment for Order {order.Id}" }
+                ["amount"] = amountInSamllestUnit.ToString(),
+                ["currency"] = order.Currency,
+                ["metadata[order_id]"] = order.Id.ToString(),
+                ["automatic_payment_methods[enabled]"] = "true",
+                ["automatic_payment_methods[allow_redirects]"] = "never"
+
             };
             var request = new HttpRequestMessage(HttpMethod.Post, "v1/payment_intents")
             {

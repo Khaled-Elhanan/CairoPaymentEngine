@@ -4,11 +4,6 @@ using CairoPaymentEngine.Application.DTOs.Responses;
 using CairoPaymentEngine.Domain.Entities;
 using CairoPaymentEngine.Domain.Enums;
 using CairoPaymentEngine.Domain.Exceptioins;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CairoPaymentEngine.Application.Service
 {

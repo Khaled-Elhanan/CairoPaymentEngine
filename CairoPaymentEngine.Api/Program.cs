@@ -3,6 +3,7 @@ using CairoPaymentEngine.Application.Abstractions;
 using CairoPaymentEngine.Application.Service;
 using CairoPaymentEngine.Infrastructure.Gateways;
 using CairoPaymentEngine.Infrastructure.Repository;
+using CairoPaymentEngine.Infrastructure.Settings;
 using CairoPaymentEngine.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,12 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddDbContext<CairoPaymentDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.Configure<StripeSettings>(
+    builder.Configuration.GetSection(StripeSettings.SectionName));
+
+
+
 
 //── Repositories 
 
