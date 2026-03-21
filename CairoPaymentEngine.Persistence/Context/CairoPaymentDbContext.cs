@@ -21,8 +21,11 @@ namespace CairoPaymentEngine.Persistence.Context
                 .HasKey(p => p.Id);
 
             modelBuilder.Entity<Payment>()
-                .HasIndex(p => p.ExternalId)
-                .IsUnique();
+            .Property(p => p.ExternalId)
+            .HasColumnType("nvarchar(MAX)");
+
+
+
             modelBuilder.Ignore<DomainEvent>();
 
             base.OnModelCreating(modelBuilder);

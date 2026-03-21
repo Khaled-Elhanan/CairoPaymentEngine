@@ -2,15 +2,9 @@
 using CairoPaymentEngine.Domain.Entities;
 using CairoPaymentEngine.Domain.Enums;
 using CairoPaymentEngine.Infrastructure.Settings;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace CairoPaymentEngine.Infrastructure.Gateways
 {

@@ -3,7 +3,6 @@
     public enum PaymentGateway
     {
         Stripe = 1,
-        Fawry = 2,
-        VodafoneCash = 3
+        Paymob =2
     }
 }

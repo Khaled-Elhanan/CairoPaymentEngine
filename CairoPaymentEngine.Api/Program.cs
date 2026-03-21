@@ -19,7 +19,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "CairoPaymentEngine API",
         Version = "v1",
-        Description = "A clean payment engine supporting Stripe, Fawry, and Vodafone Cash — built for Egypt."
+        Description = "A clean payment engine supporting Stripe, Paymob — built for Egypt."
     });
 });
 
@@ -30,6 +30,9 @@ builder.Services.AddDbContext<CairoPaymentDbContext>(options =>
 
 builder.Services.Configure<StripeSettings>(
     builder.Configuration.GetSection(StripeSettings.SectionName));
+
+builder.Services.Configure<PaymobSettings>(
+   builder.Configuration.GetSection(PaymobSettings.SectionName));
 
 
 
@@ -42,6 +45,7 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 // ── Payment Gateways
 builder.Services.AddHttpClient<IPaymentGateway, StripeGateway>();
+builder.Services.AddHttpClient<IPaymentGateway, PaymobGateway>();
 
 // ── Application Services
 builder.Services.AddScoped<PaymentOrchestrator>();

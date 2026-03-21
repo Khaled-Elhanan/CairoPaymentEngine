@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CairoPaymentEngine.Persiste
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CairoPaymentEngine.Api", "CairoPaymentEngine.Api\CairoPaymentEngine.Api.csproj", "{1D49F1A9-3461-4007-A748-C173C20D834F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CairoPaymentEngine.Tests", "CairoPaymentEngine.Tests\CairoPaymentEngine.Tests.csproj", "{F9B7C284-C272-4070-AC20-D4CFE84977B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{1D49F1A9-3461-4007-A748-C173C20D834F}.Release|x64.Build.0 = Release|Any CPU
 		{1D49F1A9-3461-4007-A748-C173C20D834F}.Release|x86.ActiveCfg = Release|Any CPU
 		{1D49F1A9-3461-4007-A748-C173C20D834F}.Release|x86.Build.0 = Release|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Debug|x64.Build.0 = Debug|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Debug|x86.Build.0 = Debug|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Release|x64.ActiveCfg = Release|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Release|x64.Build.0 = Release|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Release|x86.ActiveCfg = Release|Any CPU
+		{F9B7C284-C272-4070-AC20-D4CFE84977B0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

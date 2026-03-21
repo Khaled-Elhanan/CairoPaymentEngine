@@ -1,7 +1,6 @@
 ﻿using CairoPaymentEngine.Application.Abstractions;
 using CairoPaymentEngine.Application.DTOs.Requests;
 using CairoPaymentEngine.Application.DTOs.Responses;
-using CairoPaymentEngine.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CairoPaymentEngine.Api.Controllers
