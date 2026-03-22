@@ -29,6 +29,17 @@ namespace CairoPaymentEngine.Application.Service
                 order.Currency,
                 order.Status.ToString());
         }
+        public async Task<CreateOrderResponse> GetOrderByIdAsync(Guid id)
+        {
+            var order = await _orderRepository.GetByIdAsync(id)
+                ?? throw new OrderNotFoundException(id);
+
+            return new CreateOrderResponse(
+                order.Id,
+                order.Amount,
+                order.Currency,
+                order.Status.ToString());
+        }
         public async Task<InitiatePaymentResponse> InitiatePaymentAsync(InitiatePaymentRequest request)
         {
             if (!Enum.TryParse<PaymentGateway>(request.Gateway, ignoreCase: true, out var gatewayType))

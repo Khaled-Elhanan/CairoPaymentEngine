@@ -23,6 +23,14 @@ namespace CairoPaymentEngine.Api.Controllers
             var response = await _paymentService.CreateOrderAsync(request);
             return CreatedAtAction(nameof(CreateOrder), new { id = response.OrderId }, response);
         }
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(CreateOrderResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetOrderById(Guid id)
+        {
+            var response = await _paymentService.GetOrderByIdAsync(id);
+            return Ok(response);
+        }
         [HttpPost("{id}/pay")]
         [ProducesResponseType(typeof(InitiatePaymentResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

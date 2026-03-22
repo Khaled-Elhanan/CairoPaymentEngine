@@ -66,7 +66,7 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
             return success;
         }
 
-        // ── Step 1: Authenticate ──────────────────────────────
+        // Authenticate
 
         private async Task<string> AuthenticateAsync()
         {
@@ -84,7 +84,7 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
                 ?? throw new Exception("Paymob auth response missing token.");
         }
 
-        // ── Step 2: Create Order ──────────────────────────────
+        // Create Order 
 
         private async Task<string> CreatePaymobOrderAsync(
             string authToken, Order order, long amountInCents)
@@ -111,7 +111,7 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
                 ?? throw new Exception("Paymob order response missing id.");
         }
 
-        // ── Step 3: Get Payment Key ───────────────────────────
+        // Get Payment Key
 
         private async Task<string> GetPaymentKeyAsync(
             string authToken, string paymobOrderId, long amountInCents, string currency)
@@ -124,7 +124,7 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
                 order_id = paymobOrderId,
                 currency = currency.ToUpper(),
                 integration_id = int.Parse(_settings.IntegrationId),
-                billing_data = new
+                billing_data = new                                         
                 {
                     first_name = "Cairo",
                     last_name = "Payment",
@@ -154,7 +154,7 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
                 ?? throw new Exception("Paymob payment key response missing token.");
         }
 
-        // ── HMAC Verification (for webhook security) ──────────
+        // HMAC Verification (for webhook security) 
 
         public bool VerifyHmac(string hmacReceived, string concatenatedString)
         {

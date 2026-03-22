@@ -12,6 +12,7 @@ namespace CairoPaymentEngine.Application.Abstractions
     public interface IPaymentService
     {
         Task<CreateOrderResponse> CreateOrderAsync(CreateOrderRequest request);
+        Task<CreateOrderResponse> GetOrderByIdAsync(Guid id);
         Task<InitiatePaymentResponse> InitiatePaymentAsync(InitiatePaymentRequest request);
         Task<WebhookResponse> HandleWebhookAsync(WebhookRequest request);
     }
