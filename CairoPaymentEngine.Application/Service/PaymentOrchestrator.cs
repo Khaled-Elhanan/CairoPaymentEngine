@@ -20,7 +20,7 @@ namespace CairoPaymentEngine.Application.Service
             _paymentRepository = paymentRepository;
             _gateways = gateways;
         }
-        public async Task<string> CreatePaymentAsync(Guid orderId, PaymentGateway gatewayType)
+        public async Task<(string ExternalId, string? PaymentUrl)> CreatePaymentAsync(Guid orderId, PaymentGateway gatewayType)
         {
             var order = await _orderRepository.GetByIdAsync(orderId)
                 ?? throw new OrderNotFoundException(orderId);
@@ -31,12 +31,12 @@ namespace CairoPaymentEngine.Application.Service
             var gateway = _gateways.FirstOrDefault(g => g.GatewayType == gatewayType)
                 ?? throw new GatewayNotSupportedException(gatewayType.ToString());
 
-            var (externalId, idempotencyKey) = await gateway.CreatePaymentAsync(order);
+            var (externalId, idempotencyKey, paymentUrl) = await gateway.CreatePaymentAsync(order);
 
             var payment = new Payment(order.Id, gatewayType, externalId, idempotencyKey);
             await _paymentRepository.AddAsync(payment);
 
-            return externalId;
+            return (externalId, paymentUrl);
         }
 
         public async Task HandlePaymentSuccessAsync(

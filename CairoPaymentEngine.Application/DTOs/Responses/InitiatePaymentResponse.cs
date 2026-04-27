@@ -10,5 +10,6 @@ namespace CairoPaymentEngine.Application.DTOs.Responses
         Guid OrderId,
         string ExternalId,
         string Gateway,
+        string? PaymentUrl,
         string Message);
 }

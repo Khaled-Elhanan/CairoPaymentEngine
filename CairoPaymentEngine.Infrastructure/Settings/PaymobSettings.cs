@@ -16,6 +16,7 @@ namespace CairoPaymentEngine.Infrastructure.Settings
         public string IntegrationId { get; set; } = string.Empty;
         public string MerchantId { get; set; } = string.Empty;
         public string HmacSecret { get; set; } = string.Empty;
+        public int IframeId { get; set; }
     }
 }
 

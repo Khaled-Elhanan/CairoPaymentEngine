@@ -45,12 +45,13 @@ namespace CairoPaymentEngine.Application.Service
             if (!Enum.TryParse<PaymentGateway>(request.Gateway, ignoreCase: true, out var gatewayType))
                 throw new GatewayNotSupportedException(request.Gateway);
 
-            var externalId = await _orchestrator.CreatePaymentAsync(request.OrderId, gatewayType);
+            var (externalId, paymentUrl) = await _orchestrator.CreatePaymentAsync(request.OrderId, gatewayType);
 
             return new InitiatePaymentResponse(
                 request.OrderId,
                 externalId,
                 request.Gateway,
+                paymentUrl,
                 "Payment initiated. Awaiting gateway confirmation.");
         }
         public async Task<WebhookResponse> HandleWebhookAsync(WebhookRequest request)

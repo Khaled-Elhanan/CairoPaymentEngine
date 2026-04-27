@@ -6,7 +6,7 @@ namespace CairoPaymentEngine.Application.Abstractions
     {
         PaymentGateway GatewayType { get; }
 
-        Task<(string ExternalId, string IdempotencyKey)>
+        Task<(string ExternalId, string IdempotencyKey, string? PaymentUrl)>
          CreatePaymentAsync(Order order);
 
         Task<bool>VerifyPaymentAsync(string externalId, string eventId);

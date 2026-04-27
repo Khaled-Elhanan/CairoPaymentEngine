@@ -1,4 +1,5 @@
-@CairoPaymentEngine.Api_HostAddress = http://localhost:5273
+@CairoPaymentEngine.Api_HostAddress = http://localhost:
+
 
 GET {{CairoPaymentEngine.Api_HostAddress}}/weatherforecast/
 Accept: application/json

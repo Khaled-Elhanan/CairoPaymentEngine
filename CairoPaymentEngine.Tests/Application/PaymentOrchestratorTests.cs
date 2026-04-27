@@ -33,11 +33,12 @@ namespace CairoPaymentEngine.Tests.Application
             var order = new Order(200m, "EGP");
             _orderRepoMock.Setup(r => r.GetByIdAsync(order.Id)).ReturnsAsync(order);
             _gatewayMock.Setup(g => g.CreatePaymentAsync(order))
-                        .ReturnsAsync(("ext-123", "idem-key-123"));
+                        .ReturnsAsync(("ext-123", "idem-key-123", (string?)null));
 
-            var externalId = await _sut.CreatePaymentAsync(order.Id, PaymentGateway.Stripe);
+            var result = await _sut.CreatePaymentAsync(order.Id, PaymentGateway.Stripe);
 
-            externalId.Should().Be("ext-123");
+            result.ExternalId.Should().Be("ext-123");
+            result.PaymentUrl.Should().BeNull();
             _paymentRepoMock.Verify(r => r.AddAsync(It.IsAny<Payment>()), Times.Once);
         }
 

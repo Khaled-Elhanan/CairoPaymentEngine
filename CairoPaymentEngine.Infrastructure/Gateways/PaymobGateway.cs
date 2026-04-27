@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Globalization;
 
 namespace CairoPaymentEngine.Infrastructure.Gateways
 {
@@ -25,21 +26,28 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
             _httpClient.DefaultRequestHeaders.Accept
                 .Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-        public async Task<(string ExternalId, string IdempotencyKey)> CreatePaymentAsync(Order order)
+        public async Task<(string ExternalId, string IdempotencyKey, string? PaymentUrl)> CreatePaymentAsync(Order order)
         {
             var idempotencyKey = $"paymob-{order.Id:N}";
-            var amountInCents = (long)(order.Amount * 100);
+            var amountInCents = (long)decimal.Round(order.Amount * 100m, 0, MidpointRounding.AwayFromZero);
+            if (amountInCents <= 0)
+                throw new ArgumentException("Paymob amount must be greater than zero.");
+
+            var paymobCurrency = ResolvePaymobCurrency(order.Currency);
+            var merchantOrderId = $"{order.Id:N}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
 
             // Step 1 — Authenticate
             var authToken = await AuthenticateAsync();
 
             // Step 2 — Create Order on Paymob
-            var paymobOrderId = await CreatePaymobOrderAsync(authToken, order, amountInCents);
+            var paymobOrderId = await CreatePaymobOrderAsync(authToken, amountInCents, paymobCurrency, merchantOrderId);
 
             // Step 3 — Get Payment Key (token)
-            var paymentToken = await GetPaymentKeyAsync(authToken, paymobOrderId, amountInCents, order.Currency);
+            var paymentToken = await GetPaymentKeyAsync(authToken, paymobOrderId, amountInCents, paymobCurrency);
+            var paymentUrl =
+                $"https://accept.paymob.com/api/acceptance/iframes/{_settings.IframeId}?payment_token={paymentToken}";
 
-            return (paymentToken, idempotencyKey);
+            return (paymentToken, idempotencyKey, paymentUrl);
         }
 
         public async Task<bool> VerifyPaymentAsync(string externalId, string eventId)
@@ -77,7 +85,7 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
             var body = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception($"Paymob authentication failed: {body}");
+                throw new ArgumentException($"Paymob authentication failed: {body}");
 
             var json = JsonDocument.Parse(body);
             return json.RootElement.GetProperty("token").GetString()
@@ -87,15 +95,15 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
         // Create Order 
 
         private async Task<string> CreatePaymobOrderAsync(
-            string authToken, Order order, long amountInCents)
+            string authToken, long amountInCents, string currency, string merchantOrderId)
         {
             var payload = JsonSerializer.Serialize(new
             {
                 auth_token = authToken,
                 delivery_needed = false,
                 amount_cents = amountInCents,
-                currency = order.Currency.ToUpper(),
-                merchant_order_id = order.Id.ToString(),
+                currency = currency,
+                merchant_order_id = merchantOrderId,
                 items = Array.Empty<object>()
             });
 
@@ -104,7 +112,7 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
             var body = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception($"Paymob order creation failed: {body}");
+                throw new ArgumentException($"Paymob order creation failed: {body}");
 
             var json = JsonDocument.Parse(body);
             return json.RootElement.GetProperty("id").GetInt64().ToString()
@@ -122,7 +130,7 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
                 amount_cents = amountInCents,
                 expiration = 3600,
                 order_id = paymobOrderId,
-                currency = currency.ToUpper(),
+                currency = currency.ToUpperInvariant(),
                 integration_id = int.Parse(_settings.IntegrationId),
                 billing_data = new                                         
                 {
@@ -147,7 +155,7 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
             var body = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception($"Paymob payment key request failed: {body}");
+                throw new ArgumentException($"Paymob payment key request failed: {body}");
 
             var json = JsonDocument.Parse(body);
             return json.RootElement.GetProperty("token").GetString()
@@ -163,6 +171,15 @@ namespace CairoPaymentEngine.Infrastructure.Gateways
             var hash = new HMACSHA512(keyBytes).ComputeHash(msgBytes);
             var computed = Convert.ToHexString(hash).ToLower();
             return computed == hmacReceived.ToLower();
+        }
+
+        private static string ResolvePaymobCurrency(string currency)
+        {
+            var normalized = currency.Trim().ToUpperInvariant();
+            if (normalized != "EGP")
+                throw new ArgumentException("Paymob currently supports EGP only. Please create the order with currency EGP.");
+
+            return normalized;
         }
     }
 }

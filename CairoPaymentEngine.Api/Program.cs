@@ -13,6 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new()
@@ -33,6 +42,8 @@ builder.Services.Configure<StripeSettings>(
 
 builder.Services.Configure<PaymobSettings>(
    builder.Configuration.GetSection(PaymobSettings.SectionName));
+builder.Services.PostConfigure<PaymobSettings>(options =>
+    builder.Configuration.GetSection("PaymobSettings").Bind(options));
 
 
 
@@ -63,8 +74,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.MapControllers();
+app.UseCors("FrontendPolicy");
 app.UseHttpsRedirection();
+app.MapControllers();
 app.Run();
 
 
