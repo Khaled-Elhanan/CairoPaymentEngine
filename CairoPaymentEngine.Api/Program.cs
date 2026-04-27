@@ -101,7 +101,14 @@ if (runMigrationsOnStartup)
 {
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<CairoPaymentDbContext>();
-    dbContext.Database.Migrate();
+    if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+    {
+        dbContext.Database.EnsureCreated();
+    }
+    else
+    {
+        dbContext.Database.Migrate();
+    }
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();

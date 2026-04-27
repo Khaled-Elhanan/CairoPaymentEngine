@@ -24,6 +24,41 @@ namespace CairoPaymentEngine.Persistence.Context
             .Property(p => p.ExternalId)
             .HasColumnType("nvarchar(MAX)");
 
+            if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                modelBuilder.Entity<Order>()
+                    .Property(o => o.Id)
+                    .HasColumnType("TEXT");
+
+                modelBuilder.Entity<Order>()
+                    .Property(o => o.Amount)
+                    .HasColumnType("REAL");
+
+                modelBuilder.Entity<Order>()
+                    .Property(o => o.Currency)
+                    .HasColumnType("TEXT");
+
+                modelBuilder.Entity<Payment>()
+                    .Property(p => p.Id)
+                    .HasColumnType("TEXT");
+
+                modelBuilder.Entity<Payment>()
+                    .Property(p => p.OrderId)
+                    .HasColumnType("TEXT");
+
+                modelBuilder.Entity<Payment>()
+                    .Property(p => p.ExternalId)
+                    .HasColumnType("TEXT");
+
+                modelBuilder.Entity<Payment>()
+                    .Property(p => p.IdempotencyKey)
+                    .HasColumnType("TEXT");
+
+                modelBuilder.Entity<Payment>()
+                    .Property(p => p.ProcessedEventId)
+                    .HasColumnType("TEXT");
+            }
+
 
 
             modelBuilder.Ignore<DomainEvent>();
