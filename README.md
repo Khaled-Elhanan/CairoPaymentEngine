@@ -4,6 +4,34 @@ A **production-ready Payment Engine** built with ASP.NET Core 8, Clean Architect
 
 > Built as a portfolio project to demonstrate real-world payment gateway integration, Clean Architecture, and software design patterns — targeting the Egyptian market.
 
+## 🚀 Live Deployment
+
+[![Health](https://img.shields.io/badge/Health-Live-brightgreen?style=for-the-badge&logo=render&logoColor=white)](https://cairopaymentengine-2.onrender.com/healthz)
+[![Swagger](https://img.shields.io/badge/Swagger-UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://cairopaymentengine-2.onrender.com/swagger/index.html)
+[![Dashboard](https://img.shields.io/badge/Frontend-Dashboard-1e40af?style=for-the-badge&logo=react&logoColor=white)](https://cairopaymentengine-3.onrender.com/)
+
+---
+
+### 🧪 Test Flow — Paymob (Egypt 🇪🇬)
+
+> Use currency `EGP` to trigger Paymob gateway
+
+1. Open the [Frontend Dashboard](https://cairopaymentengine-3.onrender.com/)
+2. Create an order with currency `EGP`
+3. Initiate Paymob payment — iframe will open
+4. Complete using Paymob test card
+5. Confirm order status transitions to `Paid`
+
+---
+
+### 🧪 Test Flow — Stripe (International 🌍)
+
+> Use currency `USD` to trigger Stripe gateway
+
+1. Create an order with currency `USD`
+2. Initiate Stripe payment
+3. Complete via Stripe test flow
+4. Verify order status transitions to `Paid`
 ---
 
 ## Key Highlights
