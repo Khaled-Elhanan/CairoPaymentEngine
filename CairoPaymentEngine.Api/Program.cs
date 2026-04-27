@@ -114,11 +114,8 @@ if (runMigrationsOnStartup)
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseCors("FrontendPolicy");
 var useHttpsRedirection =
     app.Configuration.GetValue<bool?>("UseHttpsRedirection") ?? !app.Environment.IsProduction();
