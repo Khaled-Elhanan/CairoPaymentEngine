@@ -57,7 +57,14 @@ builder.Services.AddDbContext<CairoPaymentDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
 
-    options.UseSqlServer(connectionString);
+    if (connectionString.TrimStart().StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlite(connectionString);
+    }
+    else
+    {
+        options.UseSqlServer(connectionString);
+    }
 });
 
 builder.Services.Configure<StripeSettings>(
