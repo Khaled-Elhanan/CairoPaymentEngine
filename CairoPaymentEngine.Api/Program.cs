@@ -10,11 +10,9 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 
-var port = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrWhiteSpace(port))
-{
-    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-}
+var portValue = Environment.GetEnvironmentVariable("PORT");
+var port = int.TryParse(portValue, out var parsedPort) ? parsedPort : 10000;
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -24,10 +22,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
     {
-        var originsFromEnv = builder.Configuration["CORS_ALLOWED_ORIGINS"];
-        var allowedOrigins = !string.IsNullOrWhiteSpace(originsFromEnv)
-            ? originsFromEnv.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-            : builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+        var configuredOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+        var originsFromLegacyEnv = builder.Configuration["CORS_ALLOWED_ORIGINS"];
+        var allowedOrigins = configuredOrigins?.Length > 0
+            ? configuredOrigins
+            : !string.IsNullOrWhiteSpace(originsFromLegacyEnv)
+                ? originsFromLegacyEnv.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                : Array.Empty<string>();
 
         if (allowedOrigins.Length == 0)
         {
@@ -106,7 +107,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseCors("FrontendPolicy");
 var useHttpsRedirection =
-    app.Configuration.GetValue<bool?>("UseHttpsRedirection") ?? string.IsNullOrWhiteSpace(port);
+    app.Configuration.GetValue<bool?>("UseHttpsRedirection") ?? !app.Environment.IsProduction();
 if (useHttpsRedirection)
 {
     app.UseHttpsRedirection();
