@@ -8,6 +8,13 @@ using CairoPaymentEngine.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
+
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -17,7 +24,17 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        var originsFromEnv = builder.Configuration["CORS_ALLOWED_ORIGINS"];
+        var allowedOrigins = !string.IsNullOrWhiteSpace(originsFromEnv)
+            ? originsFromEnv.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            : builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+
+        if (allowedOrigins.Length == 0)
+        {
+            allowedOrigins = ["http://localhost:5173", "https://localhost:5173"];
+        }
+
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -35,15 +52,19 @@ builder.Services.AddSwaggerGen(c =>
 
 
 builder.Services.AddDbContext<CairoPaymentDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
+
+    options.UseSqlServer(connectionString);
+});
 
 builder.Services.Configure<StripeSettings>(
     builder.Configuration.GetSection(StripeSettings.SectionName));
 
 builder.Services.Configure<PaymobSettings>(
    builder.Configuration.GetSection(PaymobSettings.SectionName));
-builder.Services.PostConfigure<PaymobSettings>(options =>
-    builder.Configuration.GetSection("PaymobSettings").Bind(options));
+builder.Services.AddHealthChecks();
 
 
 
@@ -66,6 +87,15 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 var app = builder.Build();
 
+var runMigrationsOnStartup =
+    app.Configuration.GetValue<bool?>("Database:RunMigrationsOnStartup") ?? true;
+if (runMigrationsOnStartup)
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<CairoPaymentDbContext>();
+    dbContext.Database.Migrate();
+}
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
@@ -75,8 +105,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors("FrontendPolicy");
-app.UseHttpsRedirection();
+var useHttpsRedirection =
+    app.Configuration.GetValue<bool?>("UseHttpsRedirection") ?? string.IsNullOrWhiteSpace(port);
+if (useHttpsRedirection)
+{
+    app.UseHttpsRedirection();
+}
 app.MapControllers();
+app.MapHealthChecks("/healthz");
 app.Run();
 
 

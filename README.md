@@ -249,6 +249,92 @@ builder.Services.AddHttpClient<IPaymentGateway, InstaPayGateway>();
 
 ---
 
+## Render Deployment (Backend + Frontend)
+
+This repository is prepared for production deployment on Render without changing domain logic or payment workflows.
+
+### Required Environment Variables
+
+Backend (`cairopaymentengine-api`):
+
+- `ASPNETCORE_ENVIRONMENT=Production`
+- `PORT` (provided automatically by Render)
+- `ConnectionStrings__DefaultConnection`
+- `CORS_ALLOWED_ORIGINS` (comma-separated; include frontend Render URL)
+- `UseHttpsRedirection=false` (recommended on Render web service)
+- `Database__RunMigrationsOnStartup=true` (set `false` if you prefer manual migration execution)
+- `Gateways__Stripe__PublishableKey`
+- `Gateways__Stripe__SecretKey`
+- `Gateways__Stripe__WebhookSecret`
+- `Gateways__Paymob__ApiKey`
+- `Gateways__Paymob__IntegrationId`
+- `Gateways__Paymob__IframeId`
+- `Gateways__Paymob__HmacSecret`
+- `Gateways__Paymob__SecretKey` (optional)
+- `Gateways__Paymob__PublicKey` (optional)
+- `Gateways__Paymob__MerchantId` (optional)
+
+Frontend (`cairopaymentengine-frontend`):
+
+- `VITE_API_BASE_URL=https://<your-backend>.onrender.com`
+- `VITE_PAYMOB_IFRAME_ID=<paymob_iframe_id>`
+
+### Backend Service Setup on Render
+
+Use either `render.yaml` (recommended) or configure manually:
+
+- Build command: `dotnet publish CairoPaymentEngine.Api/CairoPaymentEngine.Api.csproj -c Release -o out`
+- Start command: `dotnet out/CairoPaymentEngine.Api.dll`
+
+Production behavior implemented in API:
+
+- Binds to Render port when `PORT` is present (`http://0.0.0.0:${PORT}`)
+- Swagger enabled only in Development
+- Health endpoint: `/healthz`
+- CORS reads from `CORS_ALLOWED_ORIGINS` (fallback to `Cors:AllowedOrigins`)
+- Optional auto-migration on startup via `Database__RunMigrationsOnStartup`
+
+### Frontend Service Setup on Render
+
+For `tenantix-frontend`:
+
+- Build command: `npm install && npm run build`
+- Publish directory: `dist`
+- API base URL is read from `import.meta.env.VITE_API_BASE_URL`
+
+### Database Notes
+
+Current migrations target SQL Server. Keep SQL Server in production by setting `ConnectionStrings__DefaultConnection` to your production SQL Server connection string.
+
+### Webhook Configuration
+
+Stripe:
+
+- Configure webhook endpoint to `https://<your-backend>.onrender.com/api/Webhooks/stripe`
+- Set `Gateways__Stripe__WebhookSecret` to the endpoint signing secret from Stripe dashboard
+
+Paymob:
+
+- Configure callback/webhook URL in Paymob dashboard to your deployed backend webhook endpoint
+- Set `Gateways__Paymob__HmacSecret` in Render environment variables for verification logic
+
+### Example Stripe Test Flow
+
+1. Create order from dashboard.
+2. Initiate payment using Stripe gateway.
+3. Trigger Stripe webhook (or confirm from Stripe test dashboard).
+4. Verify order/payment transitions to paid state.
+
+### Example Paymob Iframe Flow
+
+1. Create order with currency `EGP`.
+2. Initiate payment using Paymob gateway.
+3. Open returned Paymob iframe URL.
+4. Complete test card transaction.
+5. Confirm webhook callback updates order/payment status.
+
+---
+
 ## Running Tests
 
 ```bash

@@ -1,5 +1,9 @@
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+if (!apiBaseUrl) {
+  throw new Error("Missing VITE_API_BASE_URL. Configure it in tenantix-frontend/.env");
+}
+
 export const env = {
-  // Prefer local HTTP endpoint by default to avoid dev-certificate trust issues.
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5273",
+  apiBaseUrl,
   paymobIframeId: import.meta.env.VITE_PAYMOB_IFRAME_ID ?? "913961",
 };
